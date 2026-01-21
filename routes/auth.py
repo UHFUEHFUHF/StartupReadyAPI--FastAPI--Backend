@@ -9,8 +9,16 @@ from utils.security import hashing_pass , Check_pass
 authRouter = APIRouter()
 
 @authRouter.post("/login")
-def login(userLogin: UserLogin):
-    return userLogin.email
+def login(userLogin: UserLogin , db : Session = Depends(get_db)):
+    user = db.query(UserModel).filter(UserModel.email == userLogin.email).first()
+
+    if not user:
+        raise HTTPException(status_code=401 , detail="Invalid Credentials")
+
+    if not Check_pass(userLogin.password , user.password):
+        raise HTTPException(status_code=401 , detail="Invalid Credentials")
+
+    return {"message" : "successfully logged in"}
 
 
 @authRouter.post("/signup")
