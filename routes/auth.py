@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from schemas.user import UserCreate, UserLogin
 from models.model import User as UserModel
 from Database.session import get_db
-from utils.security import hashing_pass , Check_pass
+from utils.security import hashing_pass , Check_pass , create_access_token
 
 
 authRouter = APIRouter()
@@ -18,7 +18,12 @@ def login(userLogin: UserLogin , db : Session = Depends(get_db)):
     if not Check_pass(userLogin.password , user.password):
         raise HTTPException(status_code=401 , detail="Invalid Credentials")
 
-    return {"message" : "successfully logged in"}
+    token_created = create_access_token(user.id)
+
+    return {
+        "access-token" : token_created,
+        "meassage" : "token created"
+    }
 
 
 @authRouter.post("/signup")
